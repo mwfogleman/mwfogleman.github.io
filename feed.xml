@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<rss version='2.0' xmlns:atom='http://www.w3.org/2005/Atom'>
+<channel>
+<atom:link href='http://mwfogleman.github.io/' rel='self' type='application/rss+xml'/>
+<generator>
+clj-rss
+</generator>
+<title>
+rejoyce
+</title>
+<link>
+http://mwfogleman.github.io/
+</link>
+<description>
+Statements and questions about technologies
+</description>
+<lastBuildDate>
+Sat, 20 Dec 2014 14:05:35 -0500
+</lastBuildDate>
+<author>
+Michael Fogleman
+</author>
+<item>
+<guid>
+http://mwfogleman.github.io/posts/20-20-2014-first-post.html
+</guid>
+<link>
+http://mwfogleman.github.io/posts/20-20-2014-first-post.html
+</link>
+<title>
+First post
+</title>
+<description>
+&lt;p&gt;This is my first post in my new technical blog, &quot;rejoyce.&quot; I'm a real coder now that I have one of these things!&lt;/p&gt;&lt;p&gt;In case it's not obvious, I'm using the swanky new static blog generator, &lt;a href='https://lacarmen.github.io/cryogen/index.html'&gt;Cryogen&lt;/a&gt;. I haven't (yet) figured out much about how to theme these darn &quot;web-page&quot; things you new-fangled kids have dreamed up. But having nothing fancy to wear is no excuse to skip a party, so here I am.&lt;/p&gt;&lt;p&gt;Be sure to check out the &quot;About&quot; page for some clues as to what I'll be posting about (hint: this hint has parentheses in it).&lt;/p&gt;
+</description>
+<pubDate>
+Thu, 20 Aug 2015 00:00:00 -0400
+</pubDate>
+<author>
+Michael Fogleman
+</author>
+</item>
+</channel>
+</rss>
