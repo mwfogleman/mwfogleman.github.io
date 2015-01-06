@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<rss version='2.0' xmlns:atom='http://www.w3.org/2005/Atom'>
+<channel>
+<atom:link href='http://mwfogleman.github.io/' rel='self' type='application/rss+xml'/>
+<generator>
+clj-rss
+</generator>
+<title>
+rejoyce
+</title>
+<link>
+http://mwfogleman.github.io/
+</link>
+<description>
+Statements and questions about technologies
+</description>
+<lastBuildDate>
+Tue, 06 Jan 2015 12:40:06 -0500
+</lastBuildDate>
+<author>
+Michael Fogleman
+</author>
+<item>
+<guid>
+http://mwfogleman.github.io/posts/29-12-2014-a-year-of-emacs.html
+</guid>
+<link>
+http://mwfogleman.github.io/posts/29-12-2014-a-year-of-emacs.html
+</link>
+<title>
+2014: A Year of Emacs
+</title>
+<author>
+Michael Fogleman
+</author>
+</item>
+</channel>
+</rss>
