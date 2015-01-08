@@ -15,11 +15,68 @@ http://mwfogleman.github.io/
 Statements and questions about technologies
 </description>
 <lastBuildDate>
-Tue, 06 Jan 2015 12:40:06 -0500
+Thu, 08 Jan 2015 12:16:14 -0500
 </lastBuildDate>
 <author>
 Michael Fogleman
 </author>
+<item>
+<guid>
+http://mwfogleman.github.io/posts/08-01-2015-emacs-can-keep-in-touch.html
+</guid>
+<link>
+http://mwfogleman.github.io/posts/08-01-2015-emacs-can-keep-in-touch.html
+</link>
+<title>
+Emacs can keep in touch
+</title>
+<description>
+&lt;p&gt;I've wanted to show a specific Emacs workflow that I've established at the &lt;a href='http://sachachua.com/blog/2014/10/emacs-hangout-notes/'&gt;Emacs Hangouts&lt;/a&gt; that I've attended, but thought it might require too much explanation for an Emacs Hangout. Hence, this post. You might be interested in this workflow if you regularly edit a specific text file in a particular way, run an external program with the same parameters. You might also get some ideas if you're an Emacs-wielding programmer, and wish Emacs had some particular functionality, but would prefer to use Bash or another language to give it that functionality.&lt;/p&gt;&lt;p&gt;Some time ago, my friend &lt;a href='https://github.com/benpence/'&gt;Ben&lt;/a&gt; started working on a side project called &quot;&lt;a href='https://github.com/benpence/keepintouch'&gt;Keep In Touch&lt;/a&gt;.&quot; The premise: you have friends, family, and acquaintances that you'd like to stay in touch with. You maintain a list of those people, how often you'd like to contact them, and when you last contacted them. Keep In Touch can then figure out who you are out of touch with. For example, if you want to talk to someone every 30 days, but it's been 31 days, then you are out of touch with them, and the program tells you so. Simple!&lt;/p&gt;&lt;p&gt;Since I started using the program, I've fallen in love with using it. It has helped me to stay in touch with more people, more often. Moreover, I &lt;a href='https://github.com/mwfogleman/keepintouch/tree/clj'&gt;re-implemented Keep in Touch in Clojure&lt;/a&gt; as an exercise. And while Keep in Touch provides a serviceable CLI, I've worked out a simple Emacs interface for maintaining the database and viewing the program's output.&lt;/p&gt;&lt;p&gt;It all starts with telling Emacs where it can find the database:&lt;/p&gt;&lt;pre&gt;&lt;code&gt;&amp;#40;setq keepintouch-datafile &amp;quot;&amp;#126;/Dropbox/keepintouch.data&amp;quot;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Next, I needed a way to tell Emacs that I had contacted someone. The result is an interactive function that asks you who you contacted. It ordinarily assumes that you contacted the person today, but with a prefix argument, it asks you for an alternate date. Then it opens the file and makes the appropriate changes.&lt;/p&gt;&lt;pre&gt;&lt;code&gt;&amp;#40;defun keptintouch &amp;#40;arg&amp;#41;
+  &amp;quot;Request a contact in a keepintouch.data file, and update their last
+  contacted date &amp;#40;either today, or, if a prefix is supplied, a user-supplied date.&amp;#41;&amp;quot;
+  &amp;#40;interactive &amp;quot;P&amp;quot;&amp;#41;
+  &amp;#40;let &amp;#40;&amp;#40;contact &amp;#40;read-string &amp;quot;Who did you contact? &amp;quot;&amp;#41;&amp;#41;
+        &amp;#40;date &amp;#40;if &amp;#40;equal arg nil&amp;#41;
+                  &amp;#40;format-time-string &amp;quot;%Y/%m/%d&amp;quot;&amp;#41;
+                &amp;#40;read-string &amp;quot;When did you contact them? &amp;#40;year/month/date&amp;#41;: &amp;quot;&amp;#41;&amp;#41;&amp;#41;&amp;#41;
+    &amp;#40;save-excursion
+      &amp;#40;find-file keepintouch-datafile&amp;#41;
+      &amp;#40;goto-char &amp;#40;point-min&amp;#41;&amp;#41;
+      &amp;#40;search-forward contact&amp;#41;
+      &amp;#40;forward-line -1&amp;#41;
+      &amp;#40;beginning-of-line&amp;#41;
+      &amp;#40;kill-line&amp;#41;
+      &amp;#40;insert date&amp;#41;
+      &amp;#40;save-buffer&amp;#41;
+      &amp;#40;switch-to-buffer &amp;#40;other-buffer&amp;#41;&amp;#41;
+      &amp;#40;kill-buffer &amp;#40;other-buffer&amp;#41;&amp;#41;&amp;#41;
+    &amp;#40;message &amp;quot;%s was contacted.&amp;quot; contact&amp;#41;&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&quot;keptintouch&quot; uses &lt;em&gt;read-string&lt;/em&gt; to ask you who contacted, and, if need be, when you contacted them. It uses &lt;em&gt;format-time-string&lt;/em&gt; to format today's date in the appropriate format.&lt;/p&gt;&lt;p&gt;The body of the function works almost like a keyboard macro. Often, you can start writing an Elisp function by hitting &quot;C-h k&quot; (&lt;em&gt;describe-key&lt;/em&gt;) and finding out what functions are called when you execute the steps as keystrokes. Another way to do this quickly might be to make the keyboard macro, run &lt;em&gt;edit-last-kbd-macro&lt;/em&gt;, and use the function annotations to read their documentation or make pseudo-code.&lt;/p&gt;&lt;p&gt;One reason that this is a function instead of a keyboard macro is that it uses some buffer management functions. (All interactive functions are of course accessible to keyboard macros through keyboard strokes, which can really save you some time in one-off situations!) It opens my Keep In Touch database in a new buffer, finds the contact, edits their last contacted date, saves, closes, and switches the buffers. If all went well, it reports success with &lt;em&gt;message&lt;/em&gt;. If for some reason the contact is non-existent, &lt;em&gt;search-forward&lt;/em&gt; will throw an error. (If that happens, or I want to view or edit the datafile manually, I find it with &lt;em&gt;ido-recentf-open&lt;/em&gt;.)&lt;/p&gt;&lt;p&gt;All of this is wrapped in &lt;em&gt;save-excursion&lt;/em&gt;, which is kind of like the shell commands &lt;em&gt;popd&lt;/em&gt; and &lt;em&gt;pushd&lt;/em&gt; except for buffers. In other words, it does something, and then returns the user to what they were doing before they executed the function.&lt;/p&gt;&lt;p&gt;Now that I had a way to maintain the database, I needed a way to run Keep in Touch and view its output, a sorted backlog of people that you are out of touch with.&lt;/p&gt;&lt;p&gt;The Clojure version of Keep in Touch is designed to be &lt;a href='https://github.com/technomancy/leiningen/blob/stable/doc/TUTORIAL.md#uberjar'&gt;exported to a .jar file&lt;/a&gt;. Running the resulting program from the command line looks like this:&lt;/p&gt;&lt;pre&gt;&lt;code&gt;# note the special location of the .jar
+cd target/uberjar
+java -jar keepintouch-0.1.0-SNAPSHOT-standalone.jar &amp;#126;/Dropbox/keepintouch.data schedule backlog
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;I decided to look at &lt;em&gt;shell-command&lt;/em&gt;'s documentation to find a way to run this command and put the results into an output buffer. As it turns out, &lt;em&gt;shell-command&lt;/em&gt; is that function. As expected, it takes an argument for the desired shell-command. But it also allows for two optional arguments: the name of an output buffer, and the name of an error buffer.&lt;/p&gt;&lt;pre&gt;&lt;code&gt;&amp;#40;defun keptintouch-backlog &amp;#40;&amp;#41;
+  &amp;quot;Create a buffer with Keep In Touch backlog.&amp;quot;
+  &amp;#40;interactive&amp;#41;
+  &amp;#40;let &amp;#40;&amp;#40;src &amp;quot;&amp;#126;/src/keepintouch/clj/keepintouch&amp;quot;&amp;#41;
+        &amp;#40;jar &amp;quot;-jar target/uberjar/keepintouch-0.1.0-SNAPSHOT-standalone.jar&amp;quot;&amp;#41;
+        &amp;#40;cur default-directory&amp;#41;&amp;#41; 
+    &amp;#40;cd src&amp;#41;
+    &amp;#40;shell-command
+     &amp;#40;concat &amp;quot;java &amp;quot; jar &amp;quot; &amp;quot; keepintouch-datafile &amp;quot; schedule backlog&amp;quot;&amp;#41;
+     &amp;quot;&amp;#42;Keep In Touch Backlog&amp;#42;&amp;quot;&amp;#41;
+    &amp;#40;cd cur&amp;#41;&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;You'll see that the concat will expand to the shell command that runs the .jar, and that it is followed by an appropriate buffer name.&lt;/p&gt;&lt;p&gt;All of this Lisp makes its way to my finger with two key-binds (by way of &lt;a href='https://github.com/jwiegley/use-package'&gt;use-package&lt;/a&gt;'s &lt;a href='https://github.com/jwiegley/use-package/blob/master/bind-key.el'&gt;bindkey.el&lt;/a&gt;):&lt;/p&gt;&lt;pre&gt;&lt;code&gt;&amp;#40;bind-keys &amp;#40;&amp;quot;C-c k&amp;quot; . keptintouch&amp;#41;
+           &amp;#40;&amp;quot;C-c K&amp;quot; . keptintouch-backlog&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;One variable, two functions, and two keybinds are all it took to make my life easier and get back to staying in touch with friends. You can eat your Emacs cake, and have defun, too.&lt;/p&gt;
+</description>
+<pubDate>
+Thu, 08 Jan 2015 00:00:00 -0500
+</pubDate>
+<author>
+Michael Fogleman
+</author>
+</item>
 <item>
 <guid>
 http://mwfogleman.github.io/posts/29-12-2014-a-year-of-emacs.html
